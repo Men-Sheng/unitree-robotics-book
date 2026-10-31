@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Direction A - 赛博解剖 - 关键帧</title>
+<style>
+body { margin: 0; background: #0a0e1a; overflow: hidden; font-family: 'JetBrains Mono', monospace; }
+canvas { display: block; }
+</style>
+</head>
+<body>
+<canvas id="canvas"></canvas>
+<script>
+const canvas = document.getElementById('canvas');
+const ctx = canvas.getContext('2d');
+canvas.width = 1920;
+canvas.height = 1080;
+
+// 渲染镜头 4 的关键帧：电机剖面图
+function draw() {
+  // 背景
+  ctx.fillStyle = '#0a0e1a';
+  ctx.fillRect(0, 0, 1920, 1080);
+
+  // 绘制网格背景
+  ctx.strokeStyle = '#667799';
+  ctx.lineWidth = 0.5;
+  ctx.globalAlpha = 0.1;
+  for (let i = 0; i < 1920; i += 40) {
+    ctx.beginPath();
+    ctx.moveTo(i, 0);
+    ctx.lineTo(i, 1080);
+    ctx.stroke();
+  }
+  for (let i = 0; i < 1080; i += 40) {
+    ctx.beginPath();
+    ctx.moveTo(0, i);
+    ctx.lineTo(1920, i);
+    ctx.stroke();
+  }
+  ctx.globalAlpha = 1;
+
+  const cx = 960;
+  const cy = 540;
+
+  // 绘制电机剖面图层
+  // 外壳
+  ctx.strokeStyle = '#00d9ff';
+  ctx.lineWidth = 3;
+  ctx.globalAlpha = 0.8;
+  ctx.beginPath();
+  ctx.arc(cx, cy, 280, 0, Math.PI * 2);
+  ctx.stroke();
+
+  // 定子
+  ctx.globalAlpha = 0.6;
+  ctx.beginPath();
+  ctx.arc(cx, cy, 220, 0, Math.PI * 2);
+  ctx.stroke();
+
+  // 绘制定子线圈（12 个）
+  for (let i = 0; i < 12; i++) {
+    const angle = (i / 12) * Math.PI * 2;
+    const x = cx + Math.cos(angle) * 220;
+    const y = cy + Math.sin(angle) * 220;
+    ctx.beginPath();
+    ctx.arc(x, y, 15, 0, Math.PI * 2);
+    ctx.fillStyle = '#00d9ff';
+    ctx.fill();
+
+    // 辐射线
+    ctx.strokeStyle = '#00d9ff';
+    ctx.lineWidth = 1;
+    ctx.globalAlpha = 0.3;
+    ctx.beginPath();
+    ctx.moveTo(cx, cy);
+    ctx.lineTo(x, y);
+    ctx.stroke();
+  }
+
+  // 内转子
+  ctx.globalAlpha = 1;
+  ctx.strokeStyle = '#ff3366';
+  ctx.lineWidth = 4;
+  ctx.beginPath();
+  ctx.arc(cx, cy, 140, 0, Math.PI * 2);
+  ctx.stroke();
+
+  // 转子磁极（8 个）
+  ctx.fillStyle = '#ff3366';
+  for (let i = 0; i < 8; i++) {
+    const angle = (i / 8) * Math.PI * 2 + Math.PI / 8;
+    const x1 = cx + Math.cos(angle) * 100;
+    const y1 = cy + Math.sin(angle) * 100;
+    const x2 = cx + Math.cos(angle) * 140;
+    const y2 = cy + Math.sin(angle) * 140;
+    ctx.lineWidth = 6;
+    ctx.strokeStyle = '#ff3366';
+    ctx.beginPath();
+    ctx.moveTo(x1, y1);
+    ctx.lineTo(x2, y2);
+    ctx.stroke();
+  }
+
+  // 中心轴发光
+  const gradient = ctx.createRadialGradient(cx, cy, 0, cx, cy, 80);
+  gradient.addColorStop(0, 'rgba(255, 51, 102, 1)');
+  gradient.addColorStop(0.5, 'rgba(255, 51, 102, 0.5)');
+  gradient.addColorStop(1, 'rgba(255, 51, 102, 0)');
+  ctx.fillStyle = gradient;
+  ctx.beginPath();
+  ctx.arc(cx, cy, 80, 0, Math.PI * 2);
+  ctx.fill();
+
+  // 中心点
+  ctx.fillStyle = '#ffffff';
+  ctx.beginPath();
+  ctx.arc(cx, cy, 12, 0, Math.PI * 2);
+  ctx.fill();
+
+  // 轴承环
+  ctx.strokeStyle = '#667799';
+  ctx.lineWidth = 2;
+  ctx.globalAlpha = 0.7;
+  ctx.beginPath();
+  ctx.arc(cx, cy, 90, 0, Math.PI * 2);
+  ctx.stroke();
+  ctx.beginPath();
+  ctx.arc(cx, cy, 70, 0, Math.PI * 2);
+  ctx.stroke();
+
+  // 编码器指示线
+  ctx.strokeStyle = '#00d9ff';
+  ctx.lineWidth = 2;
+  ctx.globalAlpha = 1;
+  ctx.beginPath();
+  ctx.moveTo(cx, cy - 140);
+  ctx.lineTo(cx, cy - 300);
+  ctx.stroke();
+
+  // 编码器圆点
+  ctx.fillStyle = '#00d9ff';
+  ctx.beginPath();
+  ctx.arc(cx, cy - 300, 8, 0, Math.PI * 2);
+  ctx.fill();
+
+  // 辉光效果
+  ctx.globalAlpha = 0.3;
+  const glowGradient = ctx.createRadialGradient(cx, cy, 0, cx, cy, 300);
+  glowGradient.addColorStop(0, 'rgba(0, 217, 255, 0.4)');
+  glowGradient.addColorStop(1, 'rgba(0, 217, 255, 0)');
+  ctx.fillStyle = glowGradient;
+  ctx.beginPath();
+  ctx.arc(cx, cy, 300, 0, Math.PI * 2);
+  ctx.fill();
+
+  // 文字标注
+  ctx.globalAlpha = 1;
+  ctx.font = 'bold 48px "JetBrains Mono"';
+  ctx.fillStyle = '#ffffff';
+  ctx.textAlign = 'left';
+  ctx.fillText('PMSM', 1200, 400);
+
+  ctx.font = '32px "JetBrains Mono"';
+  ctx.fillStyle = '#00d9ff';
+  ctx.fillText('LOW INERTIA', 1200, 460);
+  ctx.fillText('DUAL ENCODERS', 1200, 510);
+
+  // 技术参数
+  ctx.font = '24px "JetBrains Mono"';
+  ctx.fillStyle = '#667799';
+  ctx.fillText('HIGH-SPEED INNER ROTOR', 1200, 580);
+  ctx.fillText('CROSSED ROLLER BEARING', 1200, 620);
+  ctx.fillText('LOCAL AIR COOLING', 1200, 660);
+
+  // 扫描线
+  ctx.strokeStyle = '#00d9ff';
+  ctx.lineWidth = 1;
+  ctx.globalAlpha = 0.5;
+  for (let i = 0; i < 5; i++) {
+    const y = 200 + i * 200 + (Date.now() / 10 % 200);
+    ctx.beginPath();
+    ctx.moveTo(0, y);
+    ctx.lineTo(1920, y);
+    ctx.stroke();
+  }
+}
+
+draw();
+</script>
+</body>
+</html>
